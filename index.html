@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Voice Recognition Canvas</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<style>
+    body {
+        background-color: #c9ddff;
+    }
+	canvas{
+		border: 2px black solid;
+		float: left;
+		margin: 20px;
+		background-color: white;
+	}
+	.form-control{
+		font-family: verdana;
+		height: 30px;
+		font-size: 14px;
+        padding: 2px;
+        margin-bottom: 5px;
+	}
+    #section{
+        margin-bottom: 15px;
+    }
+    .jumbotron {
+        margin: 5px;
+        padding: 10px;
+        background-color: #c9ddff;
+        font-family: verdana;
+    }
+	#form{
+		color: black;
+		font-family: verdana;
+		font-size: 15px;
+		width: 28%;
+		margin: 5px;
+		margin-top: 2px;
+		margin-right: 50px;
+		float: right;
+	}
+    .btn btn-primary btn-md {
+        color: black;
+        background-color: #95a9c9;
+        padding: 5px;
+    }
+
+	</style>
+<script src="annyang.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+var ctx, canvas, shapes, iscirc, circ;
+var color, shape, size, locationx, locationy;
+var undofill, undoshape;
+var filledshapes;
+	var array=[] //holds coordinates
+	var arrayOfPolygons=[]; //holds nameofshape and all the arrays of coordinates
+		window.onload=function(){
+			canvas = document.getElementById("canvas");
+			ctx = canvas.getContext("2d");
+			shapes = ['dot','line','triangle','square','pentagon','hexagon','septagon','octagon','nonagon','decagon',
+					'Dot', 'Line', 'Triangle', 'Square', 'Pentagon', 'Hexagon', 'Septagon', 'Octagon', 'Nonagon', 'Decagon'];
+		}
+		function buttonpressed(){
+		ctx.lineWidth=5;
+		undofill=false;
+		undoshape=true;
+		console.log("pressed");
+			color = document.getElementById("color").value;
+			//var sides = document.getElementById("sides").value;
+			shape = document.getElementById("shape").value;
+			size = document.getElementById("size").value;
+			locationx = document.getElementById("locx").value;
+			locationy = document.getElementById("locy").value;
+			var sides = findSides(shape);
+			ctx.strokeStyle = color;
+			findCoord(parseInt(locationx),parseInt(locationy),parseInt(size),parseInt(sides)); //x,y,r,s
+			arrayOfPolygons.push({shape: shape, color: color, array: array, filled: false});
+			if(!iscirc){
+				circ="dne";
+				ctx.beginPath();
+				ctx.moveTo(array[0].xcoord,array[0].ycoord);
+				for(var i = 1; i <array.length;i++){
+					ctx.lineTo(array[i].xcoord,array[i].ycoord);
+				}
+				array = [];
+				ctx.closePath();
+				ctx.stroke();
+			}
+			else{
+				ctx.beginPath();
+				ctx.arc(circ.xcoord,circ.ycoord,circ.radius,0,2*Math.PI);
+				ctx.stroke();
+				array=[];
+			}
+			console.log(arrayOfPolygons);
+		}
+
+		function findCoord(x,y,r,s){
+			console.log("coord found");
+			if(s != 999){ //not circle
+			var incr = 360/s;
+			console.log(incr);
+			var ang=90;
+			//object: xcoord, ycoord, iscircle, radius
+			array.push({xcoord: x, ycoord: y+r, isCircle: false, radius: r});
+			for(var i=0;i<s;i++){
+				array.push({xcoord: x+r*Math.cos(ang*(Math.PI/180)), ycoord: y+r*Math.sin(ang*(Math.PI/180)), isCircle: false, radius: r});
+				ang+=incr;
+				console.log(ang);
+			}
+			console.log(array);
+			}
+			else //circle
+			{
+				circ={xcoord: x, ycoord: y, isCircle: true, radius: r};
+				console.log(circ);
+				array.push(circ);
+			}
+		}
+		function findSides(s){
+			for(var i=0;i<shapes.length/2;i++){
+				iscirc = false;
+				if(shapes[i]==s || shapes[i+10]==s){
+					shape=shapes[i];
+					return i + 1;
+				}
+			}
+			if ("circle" == s || "Circle" == s){
+				shape="circle";
+				iscirc = true;
+				return 999;
+			}
+
+		}
+		function undo(){
+			console.log("undo");
+			if(undofill){}
+			if(undoshape){
+				ctx.clearRect(0,0,790,460);
+				ctx.lineWidth=5;
+				console.log(circ);
+				arrayOfPolygons.pop();
+				console.log(arrayOfPolygons);
+				for(var i=0; i<arrayOfPolygons.length; i++){
+					ctx.strokeStyle = arrayOfPolygons[i].color;
+					if(arrayOfPolygons[i].shape != "circle"){
+						ctx.beginPath();
+						ctx.moveTo(arrayOfPolygons[i].array[0].xcoord, arrayOfPolygons[i].array[0].ycoord);
+						for(var j=0; j<arrayOfPolygons[i].array.length; j++)
+							ctx.lineTo(arrayOfPolygons[i].array[j].xcoord, arrayOfPolygons[i].array[j].ycoord);
+						ctx.closePath();
+						ctx.stroke();
+						if(arrayOfPolygons[i].filled){
+							ctx.fillStyle = arrayOfPolygons[i].color;
+							ctx.fill();
+						}
+					}
+					else{
+						if(circ == "dne"){
+						ctx.beginPath();
+						ctx.arc(arrayOfPolygons[i].array[0].xcoord,arrayOfPolygons[i].array[0].ycoord,arrayOfPolygons[i].array[0].radius,0,2*Math.PI);
+						ctx.stroke();
+						if(arrayOfPolygons[i].filled){
+							ctx.fillStyle = arrayOfPolygons[i].color;
+							ctx.fill();
+						}
+						}
+					}
+				}
+			}
+		}
+		function fill(){
+			ctx.lineWidth=5;
+			undofill=true;
+			undoshape=false;
+			var s=document.getElementById("fs").value;
+			console.log(s);
+			var tofill=[];
+			var tocolor=[];
+			for(var i=0; i<arrayOfPolygons.length; i++){
+				console.log(arrayOfPolygons[i].shape);
+				if(arrayOfPolygons[i].shape == s.toLowerCase()){
+					arrayOfPolygons[i].filled=true;
+					tofill.push(arrayOfPolygons[i].array);
+					tocolor.push(arrayOfPolygons[i].color);
+				}
+			}
+			for(var i=0; i<tofill.length; i++){
+					if(!(s.toLowerCase() == "circle")){
+					ctx.beginPath();
+					ctx.moveTo(tofill[i][0].xcoord, tofill[i][0].ycoord);
+					for(var j=0; j<tofill[i].length; j++)
+						ctx.lineTo(tofill[i][j].xcoord, tofill[i][j].ycoord);
+						ctx.closePath();
+						ctx.fillStyle = tocolor[i];
+						ctx.fill();
+					}
+					else{
+						console.log("fill circle");
+						ctx.beginPath();
+						ctx.arc(tofill[i][0].xcoord,tofill[i][0].ycoord,tofill[i][0].radius,0,2*Math.PI);
+						ctx.fillStyle = tocolor[i];
+						ctx.fill();
+					}
+			}
+		}
+		
+		function clear(){
+			ctx.clearRect(0,0,790,460);
+			iscirc=false;
+			circ="dne";
+			undofill=false;
+			undoshape=false;
+			array=[] //holds coordinates
+			arrayOfPolygons=[]
+		}
+if (annyang) {
+	console.log("blah");
+	//setTimeout(annyang.abort(), 3000);
+  // Let's define our first command. First the text we expect, and then the function it should call
+  var commands = {
+    'color *color': function(color) {
+      document.getElementById("color").value=color;
+      console.log(color);
+    },
+	
+	'shape *number': function(n) {
+      document.getElementById("shape").value=n;
+      console.log(n);
+    },
+	
+	'size *number': function(n) {
+      document.getElementById("size").value=n;
+      console.log(n);
+    },
+	
+	'x location *n': function(n) {
+      document.getElementById("locx").value=n;
+      console.log(n);
+    },
+	
+	'y location *n': function(n) {
+      document.getElementById("locy").value=n;
+      console.log(n);
+    },
+	
+	'fill *s': function(s){
+		undofill=true;
+		undoshape=false;
+		console.log(s);
+		var tofill=[];
+		var tocolor=[];
+		for(var i=0; i<arrayOfPolygons.length; i++){
+			console.log(arrayOfPolygons[i].shape);
+			if(arrayOfPolygons[i].shape == s.toLowerCase()){
+				tofill.push(arrayOfPolygons[i].array);
+				tocolor.push(arrayOfPolygons[i].color);
+				}
+		}
+		for(var i=0; i<tofill.length; i++){
+				if(!(s.toLowerCase() == "circle")){
+				ctx.beginPath();
+				ctx.moveTo(tofill[i][0].xcoord, tofill[i][0].ycoord);
+				for(var j=0; j<tofill[i].length; j++)
+					ctx.lineTo(tofill[i][j].xcoord, tofill[i][j].ycoord);
+				ctx.closePath();
+				ctx.lineWidth = 5;
+				ctx.fillStyle = tocolor[i];
+				ctx.fill();
+				}
+				else{
+				console.log("fill circle");
+				ctx.beginPath();
+				ctx.arc(tofill[i][0].xcoord,tofill[i][0].ycoord,tofill[i][0].radius,0,2*Math.PI);
+				ctx.fillStyle = tocolor[i];
+				ctx.fill();
+				}
+		}
+	},
+	
+	'submit': function() {
+      buttonpressed();
+    },
+	
+	'undo': function() {
+      undo();
+    },
+	
+	'reset': function() {
+      clear();
+    }
+  };
+
+  // Add our commands to annyang
+  annyang.addCommands(commands);
+
+  // Start listening. You can call this here, or attach this call to an event, button, etc.
+  annyang.start();
+}
+</script>
+</head>
+<body>
+	<center><h1 class="jumbotron">Voice Recognition Canvas</h1>
+	<canvas id="canvas" width="790" height="460"></canvas><br></center>
+	<iframe name="votar" style="display:none;"></iframe>
+	<form autocomplete = "off" action = "test.php" method = "post" target = "votar">
+	<div id="form">
+        <div id="section">
+            <label>Shape:</label> <input class="form-control" name="shape" id="shape">
+            <label>Color:</label> <input class="form-control" name="color" id="color">
+            <label>Size:</label> <input class="form-control" name="size" id="size">
+            <label>X Location:</label> <input class="form-control" name="x" id="locx">
+            <label>Y Location:</label> <input class="form-control" name="y" id="locy">
+        </div>
+	<center><button onclick="buttonpressed()" class="btn btn-primary btn-md">Submit</button><br></center>
+        <div id="section">
+            <label>Fill Shape:</label> <input class="form-control" id="fs">
+        </div>
+	<center><button onclick="fill()" class="btn btn-primary btn-md">Fill</button>
+	<button onclick="undo()" class="btn btn-primary btn-md">Undo</button></center>
+	</div>
+	</form>
+	
+</body>
+</html>
