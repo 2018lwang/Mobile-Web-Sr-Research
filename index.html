@@ -60,7 +60,35 @@ var filledshapes;
 			ctx = canvas.getContext("2d");
 			shapes = ['dot','line','triangle','square','pentagon','hexagon','septagon','octagon','nonagon','decagon',
 					'Dot', 'Line', 'Triangle', 'Square', 'Pentagon', 'Hexagon', 'Septagon', 'Octagon', 'Nonagon', 'Decagon'];
-		}
+    }
+        var x1, y1;
+        var clicked = false;
+        function startStroke(event) {
+            clicked = true;
+            console.log(event.type);
+            x1 = event.clientX;
+            y1 = event.clientY;
+        }
+        function drawStroke(event) {
+            if (clicked) {
+                console.log(event.type);
+                var x = event.clientX;
+                var y = event.clientY;
+                ctx=canvas.getContext("2d");
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                x1 = x;
+                y1 = y;
+            }
+        }
+        function endStroke(event) {
+            clicked = false;
+            console.log(event.type);
+            var x = event.clientX;
+            var y = event.clientY;
+        }
 		function buttonpressed(){
 		ctx.lineWidth=5;
 		undofill=false;
@@ -302,7 +330,7 @@ if (annyang) {
 </head>
 <body>
 	<center><h1 class="jumbotron">Voice Recognition Canvas</h1>
-	<canvas id="canvas" width="790" height="460"></canvas><br></center>
+	<canvas id="canvas" width="790" height="460" onmousedown="startStroke(event)" onmouseup="endStroke(event)" onmousemove="drawStroke(event)"></canvas><br></center>
 	<iframe name="votar" style="display:none;"></iframe>
 	<form autocomplete = "off" action = "test.php" method = "post" target = "votar">
 	<div id="form">
