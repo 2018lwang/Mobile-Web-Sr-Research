@@ -66,14 +66,14 @@ var filledshapes;
         function startStroke(event) {
             clicked = true;
             console.log(event.type);
-            x1 = event.clientX;
-            y1 = event.clientY;
+            x1 = event.clientX-18;
+            y1 = event.clientY-90;
         }
         function drawStroke(event) {
             if (clicked) {
                 console.log(event.type);
-                var x = event.clientX;
-                var y = event.clientY;
+                var x = event.clientX-18;
+                var y = event.clientY-90;
                 ctx=canvas.getContext("2d");
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
