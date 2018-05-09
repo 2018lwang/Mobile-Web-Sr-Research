@@ -70,4 +70,5 @@ function onDoubleTap()
 	myo.debug("ToggleMouse")
 	mouseEnabled = not mouseEnabled
 	myo.controlMouse(mouseEnabled)
+	myo.centerMousePosition()
 end
