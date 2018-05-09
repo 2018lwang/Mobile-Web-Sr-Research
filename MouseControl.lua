@@ -9,17 +9,6 @@ function onForegroundWindowChange(app, title)	-- determine if the script should 
 	return true
 end
 
--- function conditionallySwapWave(pose)
--- 	if myo.getArm() == "left" then
--- 		if pose == "waveIn" then 
--- 			pose == "waveOut"	
--- 		elseif pose == "waveOut" then 
--- 			pose == "waveIn"
--- 		end
--- 	end
--- 	return pose
--- end 
-
 function onPoseEdge(pose, edge) 		-- detecting the poses 
 	myo.debug("onPoseEdge: " ..pose..": " ..edge)
 
@@ -70,5 +59,17 @@ function onDoubleTap()
 	myo.debug("ToggleMouse")
 	mouseEnabled = not mouseEnabled
 	myo.controlMouse(mouseEnabled)
-	myo.centerMousePosition()
+	--myo.presentationPointer(true, false)
+	--myo.centerPresentationPointer()
 end
+
+-- function conditionallySwapWave(pose)
+-- 	if myo.getArm() == "left" then
+-- 		if pose == "waveIn" then 
+-- 			pose == "waveOut"	
+-- 		elseif pose == "waveOut" then 
+-- 			pose == "waveIn"
+-- 		end
+-- 	end
+-- 	return pose
+-- end 
